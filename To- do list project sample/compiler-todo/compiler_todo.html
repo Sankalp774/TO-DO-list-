@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiler Course Todo Tracker</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-dark: #345990;
+            --secondary: #6abf69;
+            --background: #f5f7fa;
+            --card: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --text-lighter: #999999;
+            --border: #e1e5eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem 0;
+            border-bottom: 5px solid var(--primary-dark);
+        }
+
+        .app-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-subtitle {
+            font-size: 1rem;
+            font-weight: normal;
+            opacity: 0.8;
+        }
+
+        .stats {
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-box {
+            text-align: center;
+            flex: 1;
+            padding: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .progress-bar-container {
+            background-color: #e1e5eb;
+            border-radius: 5px;
+            height: 0.5rem;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--secondary);
+            transition: width 0.3s ease;
+        }
+
+        .unit-container {
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .unit-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.8rem;
+            margin: -1rem -1rem 1rem -1rem;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .unit-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .unit-progress {
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+
+        .topic-list {
+            list-style-type: none;
+        }
+
+        .topic-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topic-item:last-child {
+            border-bottom: none;
+        }
+
+        .topic-checkbox {
+            height: 1.2rem;
+            width: 1.2rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            accent-color: var(--secondary);
+        }
+
+        .topic-name {
+            flex: 1;
+            transition: 0.2s;
+        }
+
+        .topic-checkbox:checked+.topic-name {
+            text-decoration: line-through;
+            color: var(--text-lighter);
+        }
+
+        .filters {
+            display: flex;
+            margin-bottom: 1rem;
+            gap: 0.5rem;
+        }
+
+        .filter-button {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: 0.2s;
+        }
+
+        .filter-button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .filter-button:hover:not(.active) {
+            background-color: var(--border);
+        }
+
+        .search-container {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+
+        .clear-btn {
+            margin-left: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .clear-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .stat-box {
+                text-align: left;
+                display: flex;
+                align-items: center;
+            }
+
+            .stat-number {
+                margin-right: 1rem;
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1 class="app-title">Compiler Course Todo Tracker</h1>
+            <p class="app-subtitle">Track your progress through the compiler course curriculum</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" id="total-topics">0</div>
+                <div class="stat-label">Total Topics</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="completed-topics">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="remaining-topics">0</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+            <div class="stat-box" style="flex: 2;">
+                <div class="stat-number"><span id="completion-percentage">0</span>%</div>
+                <div class="stat-label">Overall Progress</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="overall-progress" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search for topics...">
+            <button id="clear-search" class="clear-btn">Clear</button>
+        </div>
+
+        <div class="filters">
+            <button class="filter-button active" data-filter="all">All</button>
+            <button class="filter-button" data-filter="completed">Completed</button>
+            <button class="filter-button" data-filter="remaining">Remaining</button>
+        </div>
+
+        <!-- Unit 1 -->
+        <div class="unit-container" id="unit-1">
+            <div class="unit-header">
+                <div class="unit-title">Unit 1: Introduction</div>
+                <div class="unit-progress"><span id="unit-1-progress">0</span>% Complete</div>
+            </div>
+            <ul class="topic-list">
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-1">
+                    <label for="topic-1-1" class="topic-name">Compilers</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-2">
+                    <label for="topic-1-2" class="topic-name">Phases of Compiler</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-3">
+                    <label for="topic-1-3" class="topic-name">Cousins of the Compiler</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-4">
+                    <label for="topic-1-4" class="topic-name">Grouping of Phases</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-5">
+                    <label for="topic-1-5" class="topic-name">Compiler construction tools</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-6">
+                    <label for="topic-1-6" class="topic-name">Lexical Analysis</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-7">
+                    <label for="topic-1-7" class="topic-name">Role of Lexical Analyzer</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-8">
+                    <label for="topic-1-8" class="topic-name">Input Buffering</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-9">
+                    <label for="topic-1-9" class="topic-name">Specification of Tokens</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-10">
+                    <label for="topic-1-10" class="topic-name">LEX</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-11">
+                    <label for="topic-1-11" class="topic-name">Finite Automata</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-12">
+                    <label for="topic-1-12" class="topic-name">Regular Expressions to Automata</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-13">
+                    <label for="topic-1-13" class="topic-name">Minimizing DFA</label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Unit 2 -->
+        <div class="unit-container" id="unit-2">
+            <div class="unit-header">
+                <div class="unit-title">Unit 2: Top-Down Parsing</div>
+                <div class="unit-progress"><span id="unit-2-progress">0</span>% Complete</div>
+            </div>
+            <ul class="topic-list">
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-1">
+                    <label for="topic-2-1" class="topic-name">Role of Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-2">
+                    <label for="topic-2-2" class="topic-name">Grammars</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-3">
+                    <label for="topic-2-3" class="topic-name">Error Handling</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-4">
+                    <label for="topic-2-4" class="topic-name">Context-Free Grammars</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-5">
+                    <label for="topic-2-5" class="topic-name">Writing a grammar</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-6">
+                    <label for="topic-2-6" class="topic-name">Elimination of Ambiguity</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-7">
+                    <label for="topic-2-7" class="topic-name">Left Recursion</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-8">
+                    <label for="topic-2-8" class="topic-name">Left Factoring</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-9">
+                    <label for="topic-2-9" class="topic-name">Top Down Parsing</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-10">
+                    <label for="topic-2-10" class="topic-name">Recursive Descent Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-11">
+                    <label for="topic-2-11" class="topic-name">Predictive Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-12">
+                    <label for="topic-2-12" class="topic-name">LL(1) Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-13">
+                    <label for="topic-2-13" class="topic-name">Computation of FIRST</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-14">
+                    <label for="topic-2-14" class="topic-name">Computation of FOLLOW</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-15">
+                    <label for="topic-2-15" class="topic-name">Construction of a predictive parsing table</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-16">
+                    <label for="topic-2-16" class="topic-name">Predictive Parsers LL(1) Grammars</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-17">
+                    <label for="topic-2-17" class="topic-name">Predictive Parsing Algorithm</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-2-18">
+                    <label for="topic-2-18" class="topic-name">Problems related to Predictive Parsing</label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Unit 3 -->
+        <div class="unit-container" id="unit-3">
+            <div class="unit-header">
+                <div class="unit-title">Unit 3: Bottom-Up Parsing</div>
+                <div class="unit-progress"><span id="unit-3-progress">0</span>% Complete</div>
+            </div>
+            <ul class="topic-list">
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-1">
+                    <label for="topic-3-1" class="topic-name">Bottom Up Parsing</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-2">
+                    <label for="topic-3-2" class="topic-name">Reductions</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-3">
+                    <label for="topic-3-3" class="topic-name">Handle Pruning</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-4">
+                    <label for="topic-3-4" class="topic-name">Shift Reduce Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-5">
+                    <label for="topic-3-5" class="topic-name">Problems related to Shift Reduce Parsing</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-6">
+                    <label for="topic-3-6" class="topic-name">Operator Precedence Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-7">
+                    <label for="topic-3-7" class="topic-name">LEADING, TRAILING</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-8">
+                    <label for="topic-3-8" class="topic-name">LR Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-9">
+                    <label for="topic-3-9" class="topic-name">LR Parsers</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-10">
+                    <label for="topic-3-10" class="topic-name">Need of LR Parsers</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-11">
+                    <label for="topic-3-11" class="topic-name">LR(0) Item</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-12">
+                    <label for="topic-3-12" class="topic-name">Closure of Item Sets</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-13">
+                    <label for="topic-3-13" class="topic-name">Construction of SLR Parsing Table</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-14">
+                    <label for="topic-3-14" class="topic-name">Problems related to SLR</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-15">
+                    <label for="topic-3-15" class="topic-name">Construction of Canonical LR(1)</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-16">
+                    <label for="topic-3-16" class="topic-name">Problems related to CLR</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-17">
+                    <label for="topic-3-17" class="topic-name">LALR Parser</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-3-18">
+                    <label for="topic-3-18" class="topic-name">Problems related to LALR-YACC</label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Unit 4 -->
+        <div class="unit-container" id="unit-4">
+            <div class="unit-header">
+                <div class="unit-title">Unit 4: Code Generation</div>
+                <div class="unit-progress"><span id="unit-4-progress">0</span>% Complete</div>
+            </div>
+            <ul class="topic-list">
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-1">
+                    <label for="topic-4-1" class="topic-name">Intermediate Code Generation</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-2">
+                    <label for="topic-4-2" class="topic-name">Prefix - postfix notation</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-3">
+                    <label for="topic-4-3" class="topic-name">Quadruple - triple - indirect triples
+                        Representation</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-4">
+                    <label for="topic-4-4" class="topic-name">Syntax tree</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-5">
+                    <label for="topic-4-5" class="topic-name">Evaluation of expression</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-6">
+                    <label for="topic-4-6" class="topic-name">Three-address code</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-7">
+                    <label for="topic-4-7" class="topic-name">Synthesized attributes</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-8">
+                    <label for="topic-4-8" class="topic-name">Inherited attributes</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-9">
+                    <label for="topic-4-9" class="topic-name">Intermediate languages</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-10">
+                    <label for="topic-4-10" class="topic-name">Declarations</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-11">
+                    <label for="topic-4-11" class="topic-name">Assignment statements</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-12">
+                    <label for="topic-4-12" class="topic-name">Boolean Expressions</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-13">
+                    <label for="topic-4-13" class="topic-name">Case Statements</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-14">
+                    <label for="topic-4-14" class="topic-name">Back patching</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-15">
+                    <label for="topic-4-15" class="topic-name">Procedure calls</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-16">
+                    <label for="topic-4-16" class="topic-name">Code Generation</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-17">
+                    <label for="topic-4-17" class="topic-name">Issues in the design of code generator</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-18">
+                    <label for="topic-4-18" class="topic-name">Target machine</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-19">
+                    <label for="topic-4-19" class="topic-name">Runtime Storage management</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-20">
+                    <label for="topic-4-20" class="topic-name">A simple Code generator</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-21">
+                    <label for="topic-4-21" class="topic-name">Code Generation Algorithm</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-4-22">
+                    <label for="topic-4-22" class="topic-name">Register and Address Descriptors</label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Unit 5 -->
+        <div class="unit-container" id="unit-5">
+            <div class="unit-header">
+                <div class="unit-title">Unit 5: Code Optimization</div>
+                <div class="unit-progress"><span id="unit-5-progress">0</span>% Complete</div>
+            </div>
+            <ul class="topic-list">
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-1">
+                    <label for="topic-5-1" class="topic-name">Code optimization</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-2">
+                    <label for="topic-5-2" class="topic-name">Principal Sources of Optimization</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-3">
+                    <label for="topic-5-3" class="topic-name">Function Preserving Transformation</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-4">
+                    <label for="topic-5-4" class="topic-name">Loop Optimization</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-5">
+                    <label for="topic-5-5" class="topic-name">Peephole optimization</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-6">
+                    <label for="topic-5-6" class="topic-name">DAG</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-7">
+                    <label for="topic-5-7" class="topic-name">Basic Blocks</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-8">
+                    <label for="topic-5-8" class="topic-name">Flow Graphs</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-9">
+                    <label for="topic-5-9" class="topic-name">Global Data Flow Analysis</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-10">
+                    <label for="topic-5-10" class="topic-name">Efficient Data Flow Algorithm</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-11">
+                    <label for="topic-5-11" class="topic-name">Runtime Environments</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-12">
+                    <label for="topic-5-12" class="topic-name">Source Language issues</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-13">
+                    <label for="topic-5-13" class="topic-name">Storage Organization</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-14">
+                    <label for="topic-5-14" class="topic-name">Activation Records</label>
+                </li>
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-5-15">
+                    <label for="topic-5-15" class="topic-name">Storage Allocation strategies</label>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize local storage or get saved data
+            initLocalStorage();
+
+            // Update all statistics
+            updateAllStats();
+
+            // Add event listeners to checkboxes
+            const checkboxes = document.querySelectorAll('.topic-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    // Save state to local storage
+                    saveCheckboxState(this.id, this.checked);
+
+                    // Update statistics
+                    updateAllStats();
+                });
+            });
+
+            // Add event listeners to filter buttons
+            const filterButtons = document.querySelectorAll('.filter-button');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+
+                    // Add active class to clicked button
+                    this.classList.add('active');
+
+                    // Apply filter
+                    applyFilter(this.getAttribute('data-filter'));
+                });
+            });
+
+            // Add event listener to search input
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', function () {
+                applySearch(this.value);
+            });
+
+            // Add event listener to clear search button
+            const clearSearchBtn = document.getElementById('clear-search');
+            clearSearchBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                applySearch('');
+            });
+        });
+
+        // Initialize local storage
+        function initLocalStorage() {
+            if (!localStorage.getItem('compilerTodoData')) {
+                localStorage.setItem('compilerTodoData', JSON.stringify({}));
+            }
+
+            // Load saved checkbox states
+            const savedData = JSON.parse(localStorage.getItem('compilerTodoData'));
+            const checkboxes = document.querySelectorAll('.topic-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                if (savedData[checkbox.id] === true) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        // Save checkbox state to local storage
+        function saveCheckboxState(id, isChecked) {
+            const savedData = JSON.parse(localStorage.getItem('compilerTodoData'));
+            savedData[id] = isChecked;
+            localStorage.setItem('compilerTodoData', JSON.stringify(savedData));
+        }
+
+        // Update all statistics
+        function updateAllStats() {
+            // Get all checkboxes
+            const checkboxes = document.querySelectorAll('.topic-checkbox');
+            const totalTopics = checkboxes.length;
+
+            // Count completed topics
+            let completedTopics = 0;
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    completedTopics++;
+                }
+            });
+
+            // Calculate remaining topics
+            const remainingTopics = totalTopics - completedTopics;
+
+            // Calculate completion percentage
+            const completionPercentage = Math.round((completedTopics / totalTopics) * 100);
+
+            // Update overall statistics
+            document.getElementById('total-topics').textContent = totalTopics;
+            document.getElementById('completed-topics').textContent = completedTopics;
+            document.getElementById('remaining-topics').textContent = remainingTopics;
+            document.getElementById('completion-percentage').textContent = completionPercentage;
+            document.getElementById('overall-progress').style.width = completionPercentage + '%';
+
+            // Update unit statistics
+            for (let i = 1; i <= 5; i++) {
+                updateUnitStats(i);
+            }
+        }
+
+        // Update unit statistics
+        function updateUnitStats(unitNumber) {
+            const unitCheckboxes = document.querySelectorAll(`#unit-${unitNumber} .topic-checkbox`);
+            const totalUnitTopics = unitCheckboxes.length;
+
+            let completedUnitTopics = 0;
+            unitCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    completedUnitTopics++;
+                }
+            });
+
+            const unitCompletionPercentage = Math.round((completedUnitTopics / totalUnitTopics) * 100);
+            document.getElementById(`unit-${unitNumber}-progress`).textContent = unitCompletionPercentage;
+        }
+
+        // Apply filter (all, completed, remaining)
+        function applyFilter(filter) {
+            const topicItems = document.querySelectorAll('.topic-item');
+
+            topicItems.forEach(item => {
+                const checkbox = item.querySelector('.topic-checkbox');
+
+                // Remove any hidden class first
+                item.classList.remove('hidden');
+
+                if (filter === 'completed' && !checkbox.checked) {
+                    item.classList.add('hidden');
+                } else if (filter === 'remaining' && checkbox.checked) {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+
+        // Apply search filter
+        function applySearch(searchTerm) {
+            if (!searchTerm) {
+                // If search term is empty, show all items
+                document.querySelectorAll('.topic-item').forEach(item => {
+                    item.classList.remove('hidden');
+                });
+
+                // Re-apply current filter
+                const activeFilter = document.querySelector('.filter-button.active').getAttribute('data-filter');
+                applyFilter(activeFilter);
+                return;
+            }
+
+            searchTerm = searchTerm.toLowerCase();
+            const topicItems = document.querySelectorAll('.topic-item');
+
+            topicItems.forEach(item => {
+                const topicName = item.querySelector('.topic-name').textContent.toLowerCase();
+                if (topicName.includes(searchTerm)) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

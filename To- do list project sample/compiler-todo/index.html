@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiler Todo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <h1>Compiler Todo List</h1>
+    </header>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search topics...">
+            <button id="clear-search" class="clear-btn">Clear</button>
+        </div>
+
+        <div class="filters">
+            <button class="filter-button active" data-filter="all">All</button>
+            <button class="filter-button" data-filter="completed">Completed</button>
+            <button class="filter-button" data-filter="remaining">Remaining</button>
+        </div>
+
+        <div class="stats">
+            <div>Total Topics: <span id="total-topics">0</span></div>
+            <div>Completed Topics: <span id="completed-topics">0</span></div>
+            <div>Remaining Topics: <span id="remaining-topics">0</span></div>
+            <div>Completion Percentage: <span id="completion-percentage">0</span>%</div>
+            <div class="progress-bar" id="overall-progress"></div>
+        </div>
+
+        <div class="unit-container" id="unit-1">
+            <div class="unit-header">
+                <div class="unit-title">Unit 1: Introduction</div>
+            </div>
+            <ul class="topic-list">
+                <li class="topic-item">
+                    <input type="checkbox" class="topic-checkbox" id="topic-1-1">
+                    <label for="topic-1-1" class="topic-name">Introduction to Compilers</label>
+                </li>
+                <!-- Additional topics can be added here -->
+            </ul>
+        </div>
+
+        <!-- Additional units can be added here -->
+
+    </div>
+</body>
+
+</html>
